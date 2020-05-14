@@ -27,9 +27,11 @@ namespace TEST2
         private static bool isRunning = true;
         public Form1()
         {
+            // make the app unaffected by screen scaling
             SetProcessDPIAware();
             InitializeComponent();
             this.Opacity = 0.0;
+            // start thread to wait for key listener
             listener = new Thread(keylistener);
             listener.SetApartmentState(ApartmentState.STA);
             lastOpenWindowHandle = new Queue<IntPtr>(10);
@@ -90,6 +92,7 @@ namespace TEST2
         }
         private void ShowUI()
         {
+            // Invoke new action to change form value from a thread that didn't initialize it 
             Invoke(new Action(() =>
             {
                 this.Opacity = visibility;
@@ -98,6 +101,7 @@ namespace TEST2
         }
         private void HideUI()
         {
+            // Invoke new action to change form value from a thread that didn't initialize it 
             Invoke(new Action(() =>
             {
                 this.Opacity = 0.0;
@@ -106,8 +110,10 @@ namespace TEST2
         }
         private void MoveForm(int x, int y)
         {
+            // Invoke new action to change form value from a thread that didn't initialize it 
             Invoke(new Action(() =>
             {
+                // middle of the form at (x, y)
                 this.Top = y - this.Height / 2;
                 this.Left = x - this.Width / 2;
             }));
@@ -176,14 +182,19 @@ namespace TEST2
             RECT cm;
             while (true)
             {
+                // keep the process low CPU usage
                 Thread.Sleep(40);
+
                 wasCTRLDown = false;
+
+                // Wait for CRTLleft + WINleft for activation 
                 if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LWin))
                 {
                     wasCTRLDown = true;
+                    // Checks to make sure WINleft is still clicked 
                     while (Keyboard.IsKeyDown(Key.LWin))
                     {
-                        // make the layoutImage appear when clicking a window 
+                        // Makes the layoutImage appear when clicking a window 
                         if (this.Opacity.Equals(0) && lastOpenWindowHandle.Count > 0)
                         {
                             ShowUI();
@@ -278,12 +289,14 @@ namespace TEST2
             }
             this.BackgroundImage = nextImage;
         }
+        // Get process from a windows handle
         private static Process GetProcessByHWND(IntPtr hWnd)
         {
             uint processID = 0;
             GetWindowThreadProcessId(hWnd, out processID);
             return Process.GetProcessById(Convert.ToInt32(processID));
         }
+
         private void ApplyDynamicLayoutWithBorder(Queue<IntPtr> handleQueue, int index)
         {
             IntPtr taskbarHandle = FindWindow("Shell_TrayWnd", null);
@@ -306,6 +319,14 @@ namespace TEST2
                     maxSize = 3;
                 if (isHorizontalMonitor(currentMonitor))
                 {
+                    //             |             |             |
+                    //             |             |             |
+                    //             |             |             |
+                    //             |             |             |
+                    //             |             |             |
+                    //             |             |             |
+                    //             |             |             |
+                    //             |             |             |
                     if (size > 0 && size < 5 && index % hImages[maxSize].Length == 0)
                     {
                         for (int i = 0; i < size; i++)
@@ -390,6 +411,22 @@ namespace TEST2
                 }
                 else
                 {
+                    //__ __ __ __ __ __ __ __ __
+                    //
+                    //
+                    //
+                    //
+                    //__ __ __ __ __ __ __ __ __
+                    //
+                    //
+                    //
+                    //
+                    //__ __ __ __ __ __ __ __ __
+                    //
+                    //
+                    //
+                    //
+                    //__ __ __ __ __ __ __ __ __
                     if (size > 0 && size < 4)
                     {
                         for (int i = 0; i < size; i++)
@@ -424,6 +461,7 @@ namespace TEST2
         }
         private int getMonitor(int x, int y)
         {
+            // Get monitor that contains the coordinates
             RECT monitor;
             for (int i = 0; i < monitors.Length; i++)
             {
@@ -442,6 +480,7 @@ namespace TEST2
         }
         private bool FilterProcess(Process process)
         {
+            // Prevent some processes such as the task bar from being affected by the program
             int counter = 0;
             while (counter < blacklist.Length)
             {
@@ -454,12 +493,14 @@ namespace TEST2
         }
         private float getScalingFactor(IntPtr hWnd)
         {
+            // Gets the scaling factor of the screen in which the handle is positioned
             Graphics g = Graphics.FromHwnd(hWnd);
             float dpiX = g.DpiX;
             return dpiX / 96;
         }
         private int GetBorderThickness(IntPtr hWnd)
         {
+            // Gets the thickness of the invisible border of some program window
             RECT rcClient = new RECT();
             RECT rcWind = new RECT();
             GetClientRect(hWnd, ref rcClient);
@@ -468,6 +509,7 @@ namespace TEST2
         }
         private void MoveWindowsRelativeToDisplay(IntPtr hWnd, RECT monitor, int x, int y, int width, int height, bool bRepaint) 
         {
+            // Places a windows to the position (x, y) relative to the top left corner of the choosen monitor
             MoveWindow(hWnd, monitor.left + x, monitor.top + y, width, height, bRepaint);
         }
     }
