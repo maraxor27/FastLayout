@@ -22,30 +22,23 @@ namespace TEST2
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Thread t = new Thread(FormThread);
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
             Application.Run(new TasktrayApplication());
-        }
-        private static void FormThread()
-        {
-            Application.Run(new Form1());
         }
     }
     public class TasktrayApplication : ApplicationContext
     {
         private NotifyIcon trayIcon;
-        
+        private Thread appThread;
         public TasktrayApplication()
         {
-            
+            Start();
             // Initialize Tray Icon
             trayIcon = new NotifyIcon()
             {
                 Icon = Icon.FromHandle(Resources.Icon_32x32.GetHicon()),
                 ContextMenu = new ContextMenu(new MenuItem[] {
-                new MenuItem("Exit", Exit)
-            }),
+                new MenuItem("Reset", Reset), new MenuItem("Exit", Exit)
+                }),
                 Visible = true
             };
         }
@@ -55,6 +48,25 @@ namespace TEST2
             // Hide tray icon, otherwise it will remain shown until user mouses over it
             trayIcon.Visible = false;
             Process.GetCurrentProcess().Kill();
+        }
+        void Reset(object sender, EventArgs e)
+        {
+            Stop();
+            Start();
+        }
+        void Stop() 
+        {
+            appThread.Abort();
+        }
+        void Start()
+        {
+            appThread = new Thread(FormThread);
+            appThread.SetApartmentState(ApartmentState.STA);
+            appThread.Start();
+        }
+        private static void FormThread()
+        {
+            Application.Run(new Form1());
         }
     }
 }

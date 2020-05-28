@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,6 +14,24 @@ using System.Windows.Input;
 
 namespace TEST2
 {
+    // Coordinate system of RECT structure
+    //            |
+    //  (-x,-y)   |   (x,-y) 
+    //            |
+    //-------------------------
+    //            |
+    //  (-x, y)   |   (x, y) 
+    //            |
+    // Origine at the top left corner of main display
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RECT
+    {
+        public int left;
+        public int top;
+        public int right;
+        public int bottom;
+    }
+    
     public partial class Form1 : Form
     {
         private static string[] blacklist = { "SystemSettings", "Video.UI", "WWAHost", "NVIDIA Share",
@@ -24,7 +43,7 @@ namespace TEST2
         private Image[][] hImages;
         private Image[][] vImages;
         private const double visibility = 1.0;
-        private static bool isRunning = true;
+        private List<Intersection>[] layouts;
         public Form1()
         {
             // make the app unaffected by screen scaling
@@ -46,9 +65,12 @@ namespace TEST2
         }
         private void GetMontiorSizes()
         {
+            int count = 0;
             Screen[] allScreens = Screen.AllScreens;
             monitors = new RECT[allScreens.Length];
-            int count = 0;
+            layouts = new List<Intersection>[allScreens.Length];
+            for (int i = 0; i < layouts.Length; i++)
+                layouts[i] = new List<Intersection>();
             foreach (Screen screen in allScreens)
             {
                 Graphics g = new Control().CreateGraphics();
@@ -63,33 +85,17 @@ namespace TEST2
         private void LoadImages()
         {
             hImages = new Image[4][];
-            hImages[0] = new Image[] { global::TEST2.Properties.Resources.h_layout_1_T };
-            hImages[1] = new Image[] { global::TEST2.Properties.Resources.h_layout_2_t };
-            hImages[2] = new Image[] { global::TEST2.Properties.Resources.h_layout_3_t, global::TEST2.Properties.Resources.h_layout_3_2_t };
-            hImages[3] = new Image[] { global::TEST2.Properties.Resources.h_layout_4_t, global::TEST2.Properties.Resources.h_layout_4_2_t };
+            hImages[0] = new Image[] { Properties.Resources.h_layout_1_T };
+            hImages[1] = new Image[] { Properties.Resources.h_layout_2_t };
+            hImages[2] = new Image[] { Properties.Resources.h_layout_3_t, Properties.Resources.h_layout_3_2_t };
+            hImages[3] = new Image[] { Properties.Resources.h_layout_4_t, Properties.Resources.h_layout_4_2_t };
             vImages = new Image[3][];
-            vImages[0] = new Image[] { global::TEST2.Properties.Resources.h_layout_1_T };
-            vImages[1] = new Image[] { global::TEST2.Properties.Resources.v_layout_2_t };
-            vImages[2] = new Image[] { global::TEST2.Properties.Resources.v_layout_3_t };
+            vImages[0] = new Image[] { Properties.Resources.h_layout_1_T };
+            vImages[1] = new Image[] { Properties.Resources.v_layout_2_t };
+            vImages[2] = new Image[] { Properties.Resources.v_layout_3_t };
         }
 
-        // Coordinate system of RECT structure
-        //            |
-        //  (-x,-y)   |   (x,-y) 
-        //            |
-        //-------------------------
-        //            |
-        //  (-x, y)   |   (x, y) 
-        //            |
-        // Origine at the top left corner of main display
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int left;
-            public int top;
-            public int right;
-            public int bottom;
-        }
+        
         private void ShowUI()
         {
             // Invoke new action to change form value from a thread that didn't initialize it 
@@ -182,14 +188,15 @@ namespace TEST2
             RECT cm;
             while (true)
             {
-                // keep the process low CPU usage
-                Thread.Sleep(40);
+                
 
                 wasCTRLDown = false;
 
                 // Wait for CRTLleft + WINleft for activation 
                 if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LWin))
                 {
+                    // keep the process low CPU usage
+                    Thread.Sleep(40);
                     wasCTRLDown = true;
                     // Checks to make sure WINleft is still clicked 
                     while (Keyboard.IsKeyDown(Key.LWin))
@@ -257,9 +264,6 @@ namespace TEST2
                                 Console.WriteLine("Invalide process ID");
                             }
                         }
-
-                        // keep the process low CPU usage
-                        Thread.Sleep(30);
                     }
                     HideUI();
                     if (lastOpenWindowHandle.Count != 0)
@@ -267,7 +271,19 @@ namespace TEST2
                         ApplyDynamicLayoutWithBorder(lastOpenWindowHandle, layoutCounter);
                         lastOpenWindowHandle.Clear();
                     }
-                    Thread.Sleep(500);
+                    Thread.Sleep(100);
+                } 
+                else if (Control.MouseButtons == MouseButtons.Left)
+                {
+
+                } 
+                else
+                {
+                    int monitor = getMonitor(Control.MousePosition.X, Control.MousePosition.Y);
+                    foreach (Intersection inter in layouts[monitor])
+                    {
+
+                    }
                 }
             }
         }
@@ -394,7 +410,7 @@ namespace TEST2
                                 Console.WriteLine("result of minimization: {0}", result);
                                 borderThickness = GetBorderThickness(currentHandle);
                                 MoveWindowsRelativeToDisplay(currentHandle, currentMonitor, (int)((currentMonitor.right - currentMonitor.left) * (size - 2) / (size - 1) - borderThickness * scaling),
-                                    currentMonitor.top + fullUsableHeight * i / 2,
+                                    fullUsableHeight * i / 2,
                                     (int)((currentMonitor.right - currentMonitor.left) / (size - 1) + borderThickness * 2 * scaling),
                                     (int)(fullUsableHeight / 2 + borderThickness * scaling), true);
                             }

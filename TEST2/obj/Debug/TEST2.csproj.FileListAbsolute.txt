@@ -8,3 +8,13 @@ C:\Users\simon\source\repos\TEST2\TEST2\obj\Debug\TEST2.exe
 C:\Users\simon\source\repos\TEST2\TEST2\obj\Debug\TEST2.pdb
 C:\Users\simon\source\repos\TEST2\TEST2\obj\Debug\TEST2.Form1.resources
 C:\Users\simon\source\repos\TEST2\TEST2\obj\Debug\TEST2.csprojAssemblyReference.cache
+C:\Users\simon\source\repos\FastLayout\TEST2\bin\Debug\TEST2.exe.config
+C:\Users\simon\source\repos\FastLayout\TEST2\bin\Debug\TEST2.exe
+C:\Users\simon\source\repos\FastLayout\TEST2\bin\Debug\TEST2.pdb
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Debug\TEST2.csprojAssemblyReference.cache
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Debug\TEST2.Properties.Resources.resources
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Debug\TEST2.csproj.GenerateResource.cache
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Debug\TEST2.csproj.CoreCompileInputs.cache
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Debug\TEST2.exe
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Debug\TEST2.pdb
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Debug\TEST2.Layout.resources
