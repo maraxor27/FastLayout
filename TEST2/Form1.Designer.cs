@@ -44,13 +44,12 @@ namespace TEST2
             this.ClientSize = new System.Drawing.Size(300, 300);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.MaximumSize = new System.Drawing.Size(300, 300);
-            this.MinimumSize = new System.Drawing.Size(300, 300);
             this.Name = "Form1";
+            this.Icon = Icon.FromHandle(Properties.Resources.Icon_32x32.GetHicon());
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Form1";
+            this.Text = "FastLayoutUI";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
 
