@@ -1,0 +1,14 @@
+C:\Users\simon\source\repos\FastLayout\TEST2\bin\Release\FastLayout.exe.config
+C:\Users\simon\source\repos\FastLayout\TEST2\bin\Release\FastLayout.exe.manifest
+C:\Users\simon\source\repos\FastLayout\TEST2\bin\Release\FastLayout.application
+C:\Users\simon\source\repos\FastLayout\TEST2\bin\Release\FastLayout.exe
+C:\Users\simon\source\repos\FastLayout\TEST2\bin\Release\FastLayout.pdb
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Release\TEST2.Form1.resources
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Release\TEST2.Properties.Resources.resources
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Release\TEST2.csproj.GenerateResource.cache
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Release\TEST2.csproj.CoreCompileInputs.cache
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Release\FastLayout.TrustInfo.xml
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Release\FastLayout.exe.manifest
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Release\FastLayout.application
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Release\FastLayout.exe
+C:\Users\simon\source\repos\FastLayout\TEST2\obj\Release\FastLayout.pdb

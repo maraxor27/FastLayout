@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -199,6 +200,7 @@ namespace TEST2
 
         [DllImport("User32.dll")]
         static extern bool GetClientRect(IntPtr hWnd, ref RECT Rect);
+
         private static void PrintRECT(RECT r)
         {
             Console.WriteLine("top left : [{0},{1}]\nbottom right : [{2},{3}]\n", r.left, r.top, r.right, r.bottom);
@@ -447,7 +449,6 @@ namespace TEST2
                             allWindowRECT[i] = new RECT();
                             allHWnd[i] = currentHandle;
                             GetWindowRect(currentHandle, ref allWindowRECT[i]);
-                            
                             if (i == 0)
                             {
                                 try
@@ -458,6 +459,8 @@ namespace TEST2
                             }
                         }
                         layouts[monitor].Reset();
+                        foreach (RECT r in allWindowRECT)
+                            Console.WriteLine(RECTToString(r));
                         layouts[monitor].AddIntersections(Intersection.GetIntersections(monitors[monitor], allWindowRECT, allHWnd));
                         /*
                         RECT hitBox;

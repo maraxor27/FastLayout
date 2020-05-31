@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="FastLayout.exe" version="1.0.0.4" publicKeyToken="cec39cbec436ccf5" language="neutral" processorArchitecture="msil" type="win32" />
+  <description asmv2:iconFile="icon_32x32_413_icon.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="FastLayout" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+    <commandLine file="FastLayout.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet version="1" class="System.Security.NamedPermissionSet" Name="Internet" Description="Default rights given to Internet applications" ID="Custom" SameSite="site">
+          <IPermission version="1" class="System.Security.Permissions.FileDialogPermission, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" Access="Open" />
+          <IPermission UserQuota="1024000" version="1" class="System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" Allowed="ApplicationIsolationByUser" />
+          <IPermission version="1" class="System.Security.Permissions.SecurityPermission, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" Flags="Execution" />
+          <IPermission version="1" class="System.Security.Permissions.UIPermission, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" Clipboard="OwnClipboard" Window="SafeTopLevelWindows" />
+          <IPermission version="1" class="System.Drawing.Printing.PrintingPermission, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Level="SafePrinting" />
+          <IPermission version="1" class="System.Security.Permissions.MediaPermission, WindowsBase, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" Audio="SafeAudio" Image="SafeImage" Video="SafeVideo" />
+          <IPermission version="1" class="System.Security.Permissions.WebBrowserPermission, WindowsBase, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" Level="Safe" />
+        </PermissionSet>
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!-- UAC Manifest Options
+             If you want to change the Windows User Account Control level replace the 
+             requestedExecutionLevel node with one of the following.
+
+        <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+            Specifying requestedExecutionLevel element will disable file and registry virtualization. 
+            Remove this element if your application requires this virtualization for backwards
+            compatibility.
+        -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="4.0.30319.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="FastLayout.exe" size="73184">
+      <assemblyIdentity name="FastLayout" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>wlM0IOahmLQk9zc9GYl/3QxO/92JxAOEMLZ26Qk2X6Q=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="FastLayout.exe.config" size="189">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>R+Wg8QGvQVHX8T0ta/qbhH1bXkqY0fRnS3wBV3J0bN8=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="icon_32x32_413_icon.ico" size="17726">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>oL0ijXo4Q4r+vmW8Q42pCI6wv3PsUJ6ShRyraZtQIKc=</dsig:DigestValue>
+    </hash>
+  </file>
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- A list of the Windows versions that this application has been tested on
+           and is designed to work with. Uncomment the appropriate elements
+           and Windows will automatically select the most compatible environment. -->
+      <!-- Windows Vista -->
+      <!--<supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}" />-->
+      <!-- Windows 7 -->
+      <!--<supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}" />-->
+      <!-- Windows 8 -->
+      <!--<supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />-->
+      <!-- Windows 8.1 -->
+      <!--<supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />-->
+      <!-- Windows 10 -->
+      <!--<supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />-->
+    </application>
+  </compatibility>
+<publisherIdentity name="CN=LAPTOP-IAPRSE5P\simon" issuerKeyHash="931df374c373d4d03621c9c5715e665510e7e8c3" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>1Hbd+8Qi5iICTFoUfIxANO/v4AroydWLXTcvdF3cyLo=</DigestValue></Reference></SignedInfo><SignatureValue>b8EvRS6XLahNV8ikBG1jYAVdx88h0nacjf2gf1T5T4QCL+4FX3zuth2rw1upgGFY+SLVYz7XooFOa4EVeHzqG19J8vjdtyZM1yE/wzOxIxLs58he+WGnTfaxdWvDsuOW26l7VULEW1Ok7Xyl4KaGTwxdJlxUV4Ect5m1FTk1GkI=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>wj6HV9fnpzl8TTwFbZo191RSvaOKnpS4n/CcjjaLO1A5g6H2zVi6xW/KvuWErG/qmmYlV2qpbVrV9JFvw5Jx4V1cVHLFfTXmedpslM6PvdqLxPvnRNtjmeQ76oDJhBifrRo7NdNukfBZk60NZRa+oDK41yXamJwNe+NruPr4wWk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="bac8dc5d742f375d8bd5c9e80ae0efef34408c7c145a4c0222e622c4fbdd76d4" Description="" Url=""><as:assemblyIdentity name="FastLayout.exe" version="1.0.0.4" publicKeyToken="cec39cbec436ccf5" language="neutral" processorArchitecture="msil" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=LAPTOP-IAPRSE5P\simon</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>EOJvDEFKT/pNk4PwyDjzCRH2O1rQNoWDMlVI3RAM3ms=</DigestValue></Reference></SignedInfo><SignatureValue>NPhhh36/cLrWPUFtAuZxCqu+HsCRuCABj4YyasF/4s4M+hcSDmJiqYjCS7rlhCB8jw8g9dMx1LlQJ0Px4W9KRrx5jwS2O4KEz43hA+BdxMhaBdD3V/8KqaMznOV1YxdX/vS/k+5IpWB0TB5wUH/CgSnwSXjOQ9S8aMsR27CFKUc=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>wj6HV9fnpzl8TTwFbZo191RSvaOKnpS4n/CcjjaLO1A5g6H2zVi6xW/KvuWErG/qmmYlV2qpbVrV9JFvw5Jx4V1cVHLFfTXmedpslM6PvdqLxPvnRNtjmeQ76oDJhBifrRo7NdNukfBZk60NZRa+oDK41yXamJwNe+NruPr4wWk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIB7TCCAVagAwIBAgIQIdHwOSWZYL5KE/L2T+MF1jANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDHioATABBAFAAVABPAFAALQBJAEEAUABSAFMARQA1AFAAXABzAGkAbQBvAG4wHhcNMjAwNTMxMTU0OTA1WhcNMjEwNTMxMjE0OTA1WjA1MTMwMQYDVQQDHioATABBAFAAVABPAFAALQBJAEEAUABSAFMARQA1AFAAXABzAGkAbQBvAG4wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMI+h1fX56c5fE08BW2aNfdUUr2jip6UuJ/wnI42iztQOYOh9s1YusVvyr7lhKxv6ppmJVdqqW1a1fSRb8OSceFdXFRyxX015nnabJTOj73ai8T750TbY5nkO+qAyYQYn60aOzXTbpHwWZOtDWUWvqAyuNcl2picDXvja7j6+MFpAgMBAAEwDQYJKoZIhvcNAQELBQADgYEAly6ntbRjtirjtkSax48J8bHFMlEDt1U5pZbARlJ6C8/b+iCPSu3W13APD9ryhTXlSlMgzUYgX+lVf5f5VDtoX9ZZwvVN0BIE6JLqoh1TMuOAywuM7K/wkZTELek2kiKsh0dhZal7/ZWd3BaNXVRB/PkztY8fbn+iBvgtEuDazyE=</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>

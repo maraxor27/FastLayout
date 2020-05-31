@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.RightsManagement;
@@ -36,8 +37,10 @@ namespace TEST2
         [DllImport("user32.dll", SetLastError = true)]
         static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int Width, int Height, bool Repaint);
 
+        /*
         [DllImport("user32.dll", SetLastError = true)]
         static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+        */
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
@@ -204,19 +207,19 @@ namespace TEST2
                 }
                 if (windows[i].bottom < display.bottom - taskBarHeight)
                 {
-                    intersec = GetHorizontalAdjacentWindows(windows[i].bottom, windows, hWnds, blh);
+                    intersec = GetHorizontalAdjacentWindows(windows[i].bottom - (int)(Form1.getScalingFactor(hWnds[i]) * Form1.GetBorderThickness(hWnds[i])), windows, hWnds, blh);
                     if (!AlreadyExists(result, intersec))
                         test.Add(intersec);
                 }
                 if (windows[i].right < display.right)
                 {
-                    intersec = GetVerticalAdjacentWindows(windows[i].right, windows, hWnds, blv);
+                    intersec = GetVerticalAdjacentWindows(windows[i].right - (int)(Form1.getScalingFactor(hWnds[i]) * Form1.GetBorderThickness(hWnds[i])), windows, hWnds, blv);
                     if (!AlreadyExists(result, intersec))
                         test.Add(intersec);
                 }
                 if (windows[i].left > display.left)
                 {
-                    intersec = GetVerticalAdjacentWindows(windows[i].left, windows, hWnds, blv);
+                    intersec = GetVerticalAdjacentWindows(windows[i].left + (int)(Form1.getScalingFactor(hWnds[i]) * Form1.GetBorderThickness(hWnds[i])), windows, hWnds, blv);
                     if (!AlreadyExists(result, intersec))
                         test.Add(intersec);
                 }
@@ -277,23 +280,28 @@ namespace TEST2
         }
         private static Intersection GetVerticalAdjacentWindows(int pos, RECT[] windows, IntPtr[] hWnds, List<int> bl)
         {
+            Console.WriteLine("stating to look for an intersection at pos: " + pos + " horizontal");
             if (bl.Contains(pos))
                 return null;
             List<LayoutWindow> lws = new List<LayoutWindow>();
             for (int i = 0; i < windows.Length; i++)
             {
                 IntPtr chWnd = hWnds[i];
+                Console.WriteLine("window.right = {0}\n window.left = {1}\nborder = {2}\nscaling = {3}", windows[i].right, windows[i].left, Form1.getScalingFactor(chWnd), Form1.GetBorderThickness(chWnd));
                 if (CloseEnough(windows[i].right - (int)(Form1.getScalingFactor(chWnd) * Form1.GetBorderThickness(chWnd)), pos, 1))
                 {
+                    Console.WriteLine("add " + hWnds[i]);
                     lws.Add(new LayoutWindow(windows[i], hWnds[i]));
                 } 
                 else if (CloseEnough(windows[i].left + (int)(Form1.getScalingFactor(chWnd) * Form1.GetBorderThickness(chWnd)), pos, 1))
                 {
+                    Console.WriteLine("add " + hWnds[i]);
                     lws.Add(new LayoutWindow(windows[i], hWnds[i]));
                 }
             }
             if (lws.Count > 1)
             {
+                Console.WriteLine("Intersection will be created!!!");
                 bl.Add(pos);
                 RECT hitBox = new RECT
                 {
