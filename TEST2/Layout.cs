@@ -1,18 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace TEST2
 {
     public class Layout
     {
-        public const int MAXDISTANCE = 4;
+        public static int MAXDISTANCE = 10;
         private RECT currentWin;
         private int intersectionIdCount = 0;
         private List<Intersection> intersections;
         private List<LayoutWindow> layoutWindows;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool GetWindowRect(IntPtr hWnd, ref RECT Rect);
+        //GetWindowRect(IntPtr hWnd, ref RECT Rect)
+
         public Layout(RECT r)
         {
             currentWin = r;
@@ -25,10 +32,18 @@ namespace TEST2
             intersections = new List<Intersection>();
             layoutWindows = new List<LayoutWindow>();
         }
-        public bool addIntersection(Intersection inter)
+        public void AddIntersections(List<Intersection> inters)
+        {
+            foreach (Intersection inter in inters)
+            {
+                AddIntersection(inter);
+            }
+        }
+        public bool AddIntersection(Intersection inter)
         {
             if (!ContainsRECT(inter.GetHitBox()))
                 return false;
+            inter.SetId(intersectionIdCount++);
             intersections.Add(inter);
             foreach (LayoutWindow lw in inter.GetLayoutWindowList())
                 AddLayoutWindow(lw);
@@ -36,22 +51,33 @@ namespace TEST2
         }
         private void AddLayoutWindow(LayoutWindow lw)
         {
-            foreach (LayoutWindow lw1 in layoutWindows)
+            if (!ContainshWnd(lw.GetHWnd()))
             {
-                if (lw1.GetHWnd() == lw.GetHWnd())
+                layoutWindows.Add(lw);
+                return;
+            }
+            else
+            {
+                foreach (LayoutWindow lw1 in layoutWindows)
                 {
-                    lw1.IncrementUses();
-                    return;
+                    if (lw1.GetHWnd() == lw.GetHWnd())
+                    {
+                        lw1.IncrementUses();
+                        return;
+                    }
                 }
             }
-            layoutWindows.Add(lw);
         }
         public bool RemoveInterserction(Intersection inter)
         {
             bool removedInter = false;
             for (int i = 0; i < intersections.Count && !removedInter; i++)
             {
-
+                if (inter.GetId() == intersections[i].GetId())
+                {
+                    intersections.RemoveAt(i);
+                    break;
+                }
             }
             return true;
         }
@@ -73,13 +99,48 @@ namespace TEST2
                 }
             return found;
         }
-        public List<Intersection> getIntersections()
+        public void RemoveLayoutWindow(LayoutWindow lw)
+        {
+            for (int i = 0; i < layoutWindows.Count; i++)
+            {
+                LayoutWindow lw2 = layoutWindows[i];
+                if (lw.GetHWnd() == lw2.GetHWnd())
+                {
+                    lw2.DecrementUses();
+                    if (lw2.GetUses() >= 0)
+                    {
+                        layoutWindows.RemoveAt(i);
+                    }
+                    return;
+                }
+            }
+            return;
+        }
+        public List<Intersection> GetIntersections()
         {
             return intersections;
         }
-        public List<LayoutWindow> getlayoutWindows()
+        public int GetIntersectionsSize()
+        {
+            return intersections.Count;
+        }
+        public List<LayoutWindow> GetlayoutWindows()
         {
             return layoutWindows;
+        }
+        public void CheckIntegrity()
+        {
+            RECT test = new RECT();
+            foreach (LayoutWindow lw in layoutWindows)
+            {
+                GetWindowRect(lw.GetHWnd(), ref test);
+                if (test != lw.GetWindow()) 
+                {
+                    Console.WriteLine("Integrity check failed");
+                    Reset();
+                    return; 
+                }
+            }
         }
     }
 }

@@ -29,8 +29,11 @@ namespace TEST2
     {
         private NotifyIcon trayIcon;
         private Thread appThread;
+        private bool[] msg;
+
         public TasktrayApplication()
         {
+            msg = new bool[] { false };
             Start();
             // Initialize Tray Icon
             trayIcon = new NotifyIcon()
@@ -51,22 +54,18 @@ namespace TEST2
         }
         void Reset(object sender, EventArgs e)
         {
-            Stop();
-            Start();
-        }
-        void Stop() 
-        {
-            appThread.Abort();
+            msg[0] = true;
         }
         void Start()
         {
+            Console.WriteLine("Starting Form1");
             appThread = new Thread(FormThread);
             appThread.SetApartmentState(ApartmentState.STA);
             appThread.Start();
         }
-        private static void FormThread()
+        private void FormThread()
         {
-            Application.Run(new Form1());
+            Application.Run(new Form1(msg));
         }
     }
 }

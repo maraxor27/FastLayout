@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.SqlServer.Server;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,8 +31,22 @@ namespace TEST2
         public int top;
         public int right;
         public int bottom;
+
+        // operator overload : https://stackoverflow.com/questions/15199026/comparing-two-structs-using
+        public static bool operator ==(RECT r1, RECT r2)
+        {
+            return (r1.top == r2.top && r1.bottom == r2.bottom && r1.left == r2.left && r1.right == r2.right);
+        }
+        public static bool operator !=(RECT r1, RECT r2)
+        {
+            return !(r1.top == r2.top && r1.bottom == r2.bottom && r1.left == r2.left && r1.right == r2.right);
+        }
     }
-    
+    public struct RECTPAIR
+    {
+        public RECT r1;
+        public RECT r2;
+    }
     public partial class Form1 : Form
     {
         private static string[] blacklist = { "SystemSettings", "Video.UI", "WWAHost", "NVIDIA Share",
@@ -39,17 +54,20 @@ namespace TEST2
         private Queue<IntPtr> lastOpenWindowHandle;
         private Thread listener;
         private Process currentProcess;
-        private RECT[] monitors;
+        private RECT[] monitors = null;
         private Image[][] hImages;
         private Image[][] vImages;
         private const double visibility = 1.0;
-        private List<Intersection>[] layouts;
-        public Form1()
+        private Layout[] layouts;
+        private bool[] msg;
+        public Form1(bool[] message)
         {
             // make the app unaffected by screen scaling
             SetProcessDPIAware();
             InitializeComponent();
+            msg = message;
             this.Opacity = 0.0;
+            Icon = Icon.FromHandle(Properties.Resources.Icon_32x32.GetHicon());
             // start thread to wait for key listener
             listener = new Thread(keylistener);
             listener.SetApartmentState(ApartmentState.STA);
@@ -65,22 +83,45 @@ namespace TEST2
         }
         private void GetMontiorSizes()
         {
-            int count = 0;
-            Screen[] allScreens = Screen.AllScreens;
-            monitors = new RECT[allScreens.Length];
-            layouts = new List<Intersection>[allScreens.Length];
-            for (int i = 0; i < layouts.Length; i++)
-                layouts[i] = new List<Intersection>();
-            foreach (Screen screen in allScreens)
+            if (monitors != null && monitors.Length == Screen.AllScreens.Length)
             {
-                Graphics g = new Control().CreateGraphics();
-                monitors[count].left = screen.Bounds.Location.X;
-                monitors[count].top = screen.Bounds.Location.Y;
-                monitors[count].right = screen.Bounds.X + screen.Bounds.Size.Width;
-                monitors[count].bottom = screen.Bounds.Y + screen.Bounds.Size.Height;
-                printRECT(monitors[count]);
-                count++;
+                for (int i = 0; i < monitors.Length; i++)
+                {
+                    Screen screen = Screen.AllScreens[i];
+                    RECT monitor = monitors[i];
+                    if (monitors[i].left != screen.Bounds.Location.X ||
+                        monitors[i].top != screen.Bounds.Location.Y ||
+                        monitors[i].right != screen.Bounds.X + screen.Bounds.Size.Width ||
+                        monitors[i].bottom != screen.Bounds.Y + screen.Bounds.Size.Height)
+                    {
+                        monitors[i].left = screen.Bounds.Location.X;
+                        monitors[i].top = screen.Bounds.Location.Y;
+                        monitors[i].right = screen.Bounds.X + screen.Bounds.Size.Width;
+                        monitors[i].bottom = screen.Bounds.Y + screen.Bounds.Size.Height;
+                        layouts[i] = new Layout(monitors[i]);
+                    }
+                }
             }
+            else
+            {
+                int count = 0;
+                Screen[] allScreens = Screen.AllScreens;
+                monitors = new RECT[allScreens.Length];
+                layouts = new Layout[allScreens.Length];
+                for (int i = 0; i < allScreens.Length; i++)
+                {
+                    Screen screen = allScreens[i];
+                    Graphics g = new Control().CreateGraphics();
+                    monitors[count].left = screen.Bounds.Location.X;
+                    monitors[count].top = screen.Bounds.Location.Y;
+                    monitors[count].right = screen.Bounds.X + screen.Bounds.Size.Width;
+                    monitors[count].bottom = screen.Bounds.Y + screen.Bounds.Size.Height;
+                    PrintRECT(monitors[count]);
+                    layouts[i] = new Layout(monitors[count]);
+                    count++;
+                }
+            }
+            
         }
         private void LoadImages()
         {
@@ -158,9 +199,13 @@ namespace TEST2
 
         [DllImport("User32.dll")]
         static extern bool GetClientRect(IntPtr hWnd, ref RECT Rect);
-        private static void printRECT(RECT r)
+        private static void PrintRECT(RECT r)
         {
             Console.WriteLine("top left : [{0},{1}]\nbottom right : [{2},{3}]\n", r.left, r.top, r.right, r.bottom);
+        }
+        public static String RECTToString(RECT r)
+        {
+            return String.Format("top left : [{0},{1}], bottom right : [{2},{3}]\n", r.left, r.top, r.right, r.bottom);
         }
         static void PrintProcesses(Process[] processList)
         {
@@ -184,17 +229,14 @@ namespace TEST2
         private void keylistener()
         {
             int layoutCounter = 0, cMonitor, lastMonitor = getMonitor(Control.MousePosition.X, Control.MousePosition.Y);
-            bool wasCTRLDown, ImageNeedsUpdate = false;
+            bool wasCTRLDown, wasClicked = false, ImageNeedsUpdate = false;
             RECT cm;
             while (true)
-            {
-                
-
-                wasCTRLDown = false;
-
+            {    
                 // Wait for CRTLleft + WINleft for activation 
                 if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LWin))
                 {
+                    lastOpenWindowHandle.Clear();
                     // keep the process low CPU usage
                     Thread.Sleep(40);
                     wasCTRLDown = true;
@@ -210,6 +252,11 @@ namespace TEST2
                             
                         // LayoutImage changes monitors with the cursor
                         cMonitor = getMonitor(Control.MousePosition.X, Control.MousePosition.Y);
+                        if (cMonitor == -1)
+                        {
+                            msg[0] = true;
+                            break;
+                        }
                         cm = monitors[cMonitor];
                         if (lastMonitor != cMonitor)
                         {
@@ -242,6 +289,7 @@ namespace TEST2
                         if (Control.MouseButtons == MouseButtons.Left)
                         {
                             Console.WriteLine("---   click   ---");
+                            Thread.Sleep(5);
                             try
                             {
                                 IntPtr handle = GetForegroundWindow();
@@ -266,25 +314,61 @@ namespace TEST2
                         }
                     }
                     HideUI();
-                    if (lastOpenWindowHandle.Count != 0)
+                    if (lastOpenWindowHandle.Count != 0 && !msg[0])
                     {
                         ApplyDynamicLayoutWithBorder(lastOpenWindowHandle, layoutCounter);
                         lastOpenWindowHandle.Clear();
+                        Thread.Sleep(100);
                     }
-                    Thread.Sleep(100);
+                    
                 } 
-                else if (Control.MouseButtons == MouseButtons.Left)
+                if (Control.MouseButtons == MouseButtons.Left && !wasClicked)
                 {
-
-                } 
-                else
-                {
+                    wasClicked = true;
+                    Console.WriteLine("click!");
+                    Intersection currentIntersection;
                     int monitor = getMonitor(Control.MousePosition.X, Control.MousePosition.Y);
-                    foreach (Intersection inter in layouts[monitor])
+                    Intersection inter = null;
+                    for (int i = 0; i < layouts[monitor].GetIntersectionsSize(); i++)
                     {
-
+                        currentIntersection = layouts[monitor].GetIntersections()[i];
+                        if (currentIntersection.IsInHitBox(Control.MousePosition.X, Control.MousePosition.Y))
+                        {
+                            inter = currentIntersection;
+                            break;
+                        }
                     }
+                    if (inter != null)
+                    {
+                        Console.WriteLine("hitbox: " + RECTToString(inter.GetHitBox()) +
+                                " with mouse at: (" + Control.MousePosition.X + ", " + Control.MousePosition.Y + ")");
+                        int lx, ly;
+                        do
+                        {
+                            lx = Control.MousePosition.X;
+                            ly = Control.MousePosition.Y;
+                            inter.MoveHitBox(Control.MousePosition.X, Control.MousePosition.Y);
+                        } while (Control.MouseButtons == MouseButtons.Left);
+                        Thread.Sleep(30);
+                        inter.MoveHitBox(lx, ly);
+                    } 
+                    else
+                    {
+                        do
+                        {
+                            layouts[monitor].CheckIntegrity();
+                            Thread.Sleep(30);
+                        } while (Control.MouseButtons == MouseButtons.Left);
+                    }
+                } 
+                else if (Control.MouseButtons != MouseButtons.Left)
+                    wasClicked = false;
+                if (msg[0])
+                {
+                    GetMontiorSizes();
+                    msg[0] = false;
                 }
+                Thread.Sleep(30);
             }
         }
         private void UpdateLayoutImage(RECT monitor, int index1, int index2)
@@ -345,6 +429,8 @@ namespace TEST2
                     //             |             |             |
                     if (size > 0 && size < 5 && index % hImages[maxSize].Length == 0)
                     {
+                        IntPtr[] allHWnd = new IntPtr[size];
+                        RECT[] allWindowRECT = new RECT[size];
                         for (int i = 0; i < size; i++)
                         {
                             rect = new RECT();
@@ -358,6 +444,10 @@ namespace TEST2
                                     0, (int)((currentMonitor.right - currentMonitor.left) / size + borderThickness * 2 * scaling),
                                     (int)(currentMonitor.bottom - currentMonitor.top - taskBarHeight + borderThickness * scaling), true);
                             }
+                            allWindowRECT[i] = new RECT();
+                            allHWnd[i] = currentHandle;
+                            GetWindowRect(currentHandle, ref allWindowRECT[i]);
+                            
                             if (i == 0)
                             {
                                 try
@@ -367,6 +457,29 @@ namespace TEST2
                                 catch (System.InvalidOperationException) { }
                             }
                         }
+                        layouts[monitor].Reset();
+                        layouts[monitor].AddIntersections(Intersection.GetIntersections(monitors[monitor], allWindowRECT, allHWnd));
+                        /*
+                        RECT hitBox;
+                        int center;
+                        List<LayoutWindow> lws;
+                        for (int i = 1; i < size; i++)
+                        {
+                            hitBox = new RECT();
+                            hitBox.top = monitors[monitor].top;
+                            hitBox.bottom = monitors[monitor].bottom;
+                            center = (int)((currentMonitor.right - currentMonitor.left) * i / size);
+                            hitBox.right = center + Intersection.GetMAXDISTANCE();
+                            hitBox.left = center - 1 - Intersection.GetMAXDISTANCE();
+                            lws = new List<LayoutWindow>();
+                            PrintRECT(allWindowRECT[i - 1]);
+                            PrintRECT(allWindowRECT[i]);
+                            lws.Add(new LayoutWindow(allWindowRECT[i - 1], allHWnd[i - 1]));
+                            lws.Add(new LayoutWindow(allWindowRECT[i], allHWnd[i]));
+                            layouts[monitor].AddIntersection(new Intersection(hitBox, lws, true));
+                            Console.WriteLine("created a hit bot at: " + RECTToString(hitBox));
+                        }
+                        */
                     }
                     //             |             |
                     //             |             |
@@ -378,6 +491,9 @@ namespace TEST2
                     //             |             |
                     else if (size > 2 && size < 5 && index % hImages[maxSize].Length == 1)
                     {
+                        IntPtr[] allHWnd = new IntPtr[size];
+                        RECT[] allWindowRECT = new RECT[size];
+                        int count = 0;
                         for (int i = 0; i < size - 2; i++)
                         {
                             rect = new RECT();
@@ -390,7 +506,11 @@ namespace TEST2
                                 MoveWindowsRelativeToDisplay(currentHandle, currentMonitor, (int)((currentMonitor.right - currentMonitor.left) * i / (size - 1) - borderThickness * scaling),
                                     0, (int)((currentMonitor.right - currentMonitor.left) / (size - 1) + borderThickness * 2 * scaling),
                                     (int)(currentMonitor.bottom - currentMonitor.top - taskBarHeight + borderThickness * scaling), true);
-                            }
+                            } 
+                            allWindowRECT[i] = new RECT();
+                            allHWnd[i] = currentHandle;
+                            GetWindowRect(currentHandle, ref allWindowRECT[i]);
+                            count++;
                             if (i == 0)
                             {
                                 try
@@ -414,6 +534,10 @@ namespace TEST2
                                     (int)((currentMonitor.right - currentMonitor.left) / (size - 1) + borderThickness * 2 * scaling),
                                     (int)(fullUsableHeight / 2 + borderThickness * scaling), true);
                             }
+                            allWindowRECT[count] = new RECT();
+                            allHWnd[count] = currentHandle;
+                            GetWindowRect(currentHandle, ref allWindowRECT[count]);
+                            count++;
                             if (i == 0)
                             {
                                 try
@@ -423,6 +547,8 @@ namespace TEST2
                                 catch (System.InvalidOperationException) { }
                             }
                         }
+                        layouts[monitor].Reset();
+                        layouts[monitor].AddIntersections(Intersection.GetIntersections(monitors[monitor], allWindowRECT, allHWnd));
                     }
                 }
                 else
@@ -445,6 +571,8 @@ namespace TEST2
                     //__ __ __ __ __ __ __ __ __
                     if (size > 0 && size < 4)
                     {
+                        IntPtr[] allHWnd = new IntPtr[size];
+                        RECT[] allWindowRECT = new RECT[size];
                         for (int i = 0; i < size; i++)
                         {
                             rect = new RECT();
@@ -458,6 +586,9 @@ namespace TEST2
                                     (int)(currentMonitor.right - currentMonitor.left + borderThickness * 2 * scaling),
                                     (int)(fullUsableHeight / size + borderThickness * scaling), true);
                             }
+                            allWindowRECT[i] = new RECT();
+                            allHWnd[i] = currentHandle;
+                            GetWindowRect(currentHandle, ref allWindowRECT[i]);
                             if (i == 0)
                             {
                                 try
@@ -467,6 +598,8 @@ namespace TEST2
                                 catch (System.InvalidOperationException) { }
                             }
                         }
+                        layouts[monitor].Reset();
+                        layouts[monitor].AddIntersections(Intersection.GetIntersections(monitors[monitor], allWindowRECT, allHWnd));
                     }
                 }
             }
@@ -507,14 +640,14 @@ namespace TEST2
             }
             return true;        
         }
-        private float getScalingFactor(IntPtr hWnd)
+        public static float getScalingFactor(IntPtr hWnd)
         {
             // Gets the scaling factor of the screen in which the handle is positioned
             Graphics g = Graphics.FromHwnd(hWnd);
             float dpiX = g.DpiX;
             return dpiX / 96;
         }
-        private int GetBorderThickness(IntPtr hWnd)
+        public static int GetBorderThickness(IntPtr hWnd)
         {
             // Gets the thickness of the invisible border of some program window
             RECT rcClient = new RECT();
