@@ -651,7 +651,7 @@ namespace TEST2
             // Gets the scaling factor of the screen in which the handle is positioned
             Graphics g = Graphics.FromHwnd(hWnd);
             float dpiX = g.DpiX;
-            return dpiX / 96;
+            return 1;//dpiX / 96;
         }
         public static int GetBorderThickness(IntPtr hWnd)
         {
