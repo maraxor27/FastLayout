@@ -92,10 +92,10 @@ namespace TEST2
         }
         public void MoveHitBox(int x, int y)
         {
-            Console.WriteLine("Moving intersection to (" + x + "," + y + ")");
+            // Console.WriteLine("Moving intersection to (" + x + "," + y + ")");
             foreach (LayoutWindow lw in layoutWindowList)
             {
-                UpdateWindow(lw.GetHWnd(), x, y);
+                UpdateWindow(lw, x, y);
                 lw.UpdateWindow();
             }
             if (IsMovingVertically())
@@ -110,26 +110,34 @@ namespace TEST2
             }
 
         }
-        private void UpdateWindow(IntPtr hWnd, int x, int y)
+        private void UpdateWindow(LayoutWindow lw, int x, int y)
         {
-            Console.WriteLine("\tMoving window to (" + x + "," + y + ")");
+            IntPtr hWnd = lw.GetHWnd();
+            // Console.WriteLine("\tMoving window to (" + x + "," + y + ")");
             RECT currentWindow = new RECT();
             GetWindowRect(hWnd, ref currentWindow);
+            
             int thickness = Form1.GetBorderThickness(hWnd);
             float scaling = Form1.getScalingFactor(hWnd);
             if (IsMovingHorizontally())
             {
-                Console.WriteLine("\tHorizontal change");
+                // Console.WriteLine("\tHorizontal change");
                 currentWindow.right -= (int)(thickness * scaling);
                 currentWindow.left += (int)(thickness * scaling);
-                Console.WriteLine("\t\thitBox: " + Form1.RECTToString(hitBox));
-                Console.WriteLine("\t\tWindow: " + Form1.RECTToString(currentWindow));
+                // Console.WriteLine("\t\thitBox: " + Form1.RECTToString(hitBox));
+                // Console.WriteLine("\t\tWindow: " + Form1.RECTToString(currentWindow));
                 if (currentWindow.right >= hitBox.left && currentWindow.right <= hitBox.right)
                 {
                     MoveWindow(hWnd, currentWindow.left - (int)(thickness * scaling), 
                         currentWindow.top, 
                         (x - currentWindow.left) + 2 * (int)(thickness * scaling), 
-                        (currentWindow.bottom - currentWindow.top), true); 
+                        (currentWindow.bottom - currentWindow.top), true);
+                    lw.SetWindow(new RECT { 
+                        top = currentWindow.top, 
+                        left = currentWindow.left - (int)(thickness * scaling),
+                        bottom = currentWindow.bottom,
+                        right = x + (int)(thickness * scaling)
+                    });
                     /*
                     SetWindowPos(hWnd, hWndInsertAfter, currentWindow.left - (int)(thickness * scaling),
                         currentWindow.top,
@@ -143,35 +151,65 @@ namespace TEST2
                         currentWindow.top,
                         (currentWindow.right - x) + 2 * (int)(thickness * scaling),
                         (currentWindow.bottom - currentWindow.top), true);
+                    lw.SetWindow(new RECT
+                    {
+                        top = currentWindow.top,
+                        left = x - (int)(thickness * scaling),
+                        bottom = currentWindow.bottom,
+                        right = currentWindow.right + (int)(thickness * scaling)
+                    });
                 }
             }
             else if (IsMovingVertically())
             {
-                Console.WriteLine("\tVertical change");
+                // Console.WriteLine("\tVertical change");
                 currentWindow.bottom -= (int)(thickness * scaling);
-                Console.WriteLine("\t\thitBox: " + Form1.RECTToString(hitBox));
-                Console.WriteLine("\t\tWindow: " + Form1.RECTToString(currentWindow));
+                // Console.WriteLine("\t\thitBox: " + Form1.RECTToString(hitBox));
+                // Console.WriteLine("\t\tWindow: " + Form1.RECTToString(currentWindow));
                 
-                // currentWindow.top += (int)(thickness * scaling);
                 if (currentWindow.bottom >= hitBox.top && currentWindow.bottom <= hitBox.bottom)
                 {
                     bool r = MoveWindow(hWnd, currentWindow.left,
-                        currentWindow.top - (int)(thickness * scaling),
+                        currentWindow.top,
                         currentWindow.right - currentWindow.left,
                         (y - currentWindow.top) + (int)(thickness * scaling), true);
-                    Console.WriteLine("\t\tWas move1 successful: " + r);
+                    // Console.WriteLine("\t\tWas move1 successful: " + r);
+                    lw.SetWindow(new RECT
+                    {
+                        top = currentWindow.top,
+                        left = currentWindow.left,
+                        bottom = y + (int)(thickness * scaling),
+                        right = currentWindow.right
+                    });
                 }
                 else if (currentWindow.top >= hitBox.top && currentWindow.top <= hitBox.bottom)
                 {
                     bool r = MoveWindow(hWnd, currentWindow.left,
                         y, currentWindow.right - currentWindow.left,
                         (currentWindow.bottom - y) + (int)(thickness * scaling), true);
-                    Console.WriteLine("\t\tWas move2 successful: " + r);
+                    //Console.WriteLine("\t\tWas move2 successful: " + r);
+                    lw.SetWindow(new RECT
+                    {
+                        top = y,
+                        left = currentWindow.left,
+                        bottom = currentWindow.bottom + (int)(thickness * scaling),
+                        right = currentWindow.right
+                    });
                 } 
                 else
                 {
                     Console.WriteLine("\t\tCan't find edges");
                 }
+            }
+            // Console.WriteLine("\t\tNew Window: " + Form1.RECTToString(lw.GetWindow()));
+        }
+        public void UpdateWindows()
+        {
+            foreach (LayoutWindow lw in layoutWindowList) 
+            {
+                RECT r = new RECT();
+                GetWindowRect(lw.GetHWnd(), ref r);
+                lw.SetWindow(r);
             }
         }
         public bool Equals(Intersection other)
@@ -254,25 +292,26 @@ namespace TEST2
             if (lws.Count > 1)
             {
                 bl.Add(pos);
+                IntPtr hWnd = lws[0].GetHWnd();
                 RECT hitBox = new RECT
                 {
                     top = pos - GetMAXDISTANCE(),
                     bottom = pos + GetMAXDISTANCE(),
-                    right = lws[1].GetWindow().right,
-                    left = lws[1].GetWindow().left
+                    right = lws[0].GetWindow().right - (int)(Form1.getScalingFactor(hWnd) * Form1.GetBorderThickness(hWnd)),
+                    left = lws[0].GetWindow().left + (int)(Form1.getScalingFactor(hWnd) * Form1.GetBorderThickness(hWnd))
                 };
 
                 for (int i = 1; i < lws.Count; i++)
                 {
                     IntPtr chWnd = lws[i].GetHWnd();
-                    if (lws[i].GetWindow().right - (int)(Form1.getScalingFactor(chWnd) * Form1.GetBorderThickness(chWnd)) < hitBox.right)
-                        hitBox.right = lws[i].GetWindow().right;
+                    if (lws[i].GetWindow().right - (int)(Form1.getScalingFactor(chWnd) * Form1.GetBorderThickness(chWnd)) > hitBox.right)
+                        hitBox.right = lws[i].GetWindow().right - (int)(Form1.getScalingFactor(chWnd) * Form1.GetBorderThickness(chWnd));
                 }
                 for (int i = 1; i < lws.Count; i++)
                 {
                     IntPtr chWnd = lws[i].GetHWnd();
-                    if (lws[i].GetWindow().left + (int)(Form1.getScalingFactor(chWnd) * Form1.GetBorderThickness(chWnd)) > hitBox.left)
-                        hitBox.left = lws[i].GetWindow().left;
+                    if (lws[i].GetWindow().left + (int)(Form1.getScalingFactor(chWnd) * Form1.GetBorderThickness(chWnd)) < hitBox.left)
+                        hitBox.left = lws[i].GetWindow().left + (int)(Form1.getScalingFactor(chWnd) * Form1.GetBorderThickness(chWnd));
                 }
                 return new Intersection(hitBox, lws, false);
             }
@@ -303,10 +342,11 @@ namespace TEST2
             {
                 Console.WriteLine("Intersection will be created!!!");
                 bl.Add(pos);
+                IntPtr hWnd = lws[0].GetHWnd();
                 RECT hitBox = new RECT
                 {
-                    top = lws[1].GetWindow().top,
-                    bottom = lws[1].GetWindow().bottom,
+                    top = lws[0].GetWindow().top,
+                    bottom = lws[0].GetWindow().bottom - (int)(Form1.getScalingFactor(hWnd) * Form1.GetBorderThickness(hWnd)),
                     right = pos + GetMAXDISTANCE(),
                     left = pos - GetMAXDISTANCE()
                 };
@@ -346,7 +386,7 @@ namespace TEST2
             }
             return false;
         }
-        private static bool IsHitBoxHorizontal(RECT r)
+        public static bool IsHitBoxHorizontal(RECT r)
         {
             return (r.right - r.left) > (r.bottom - r.top);
         }
@@ -366,12 +406,19 @@ namespace TEST2
         }
         public override string ToString()
         {
-            string result = string.Format("<Intersection:<hitBox: <({0},{1}), ({2},{3})>", hitBox.left, hitBox.top, hitBox.right, hitBox.bottom);
+            string result = string.Format("<{4} Intersection:<hitBox: <({0},{1}), ({2},{3})>", hitBox.left, hitBox.top, hitBox.right, hitBox.bottom, OrientationToString());
             foreach (LayoutWindow lw in layoutWindowList)
             {
                 result = result + ",\n\t" + lw.ToString();
             }
             return result;
+        }
+        private string OrientationToString()
+        {
+            if (IsMovingHorizontally())
+                return "vertical";
+            else
+                return "horizontal";
         }
     }
 }

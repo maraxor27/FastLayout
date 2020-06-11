@@ -327,12 +327,14 @@ namespace TEST2
                 if (Control.MouseButtons == MouseButtons.Left && !wasClicked)
                 {
                     wasClicked = true;
-                    Console.WriteLine("click!");
+                    // Console.WriteLine("click!");
                     Intersection currentIntersection;
                     int monitor = getMonitor(Control.MousePosition.X, Control.MousePosition.Y);
                     Intersection inter = null;
                     for (int i = 0; i < layouts[monitor].GetIntersectionsSize(); i++)
                     {
+                        Console.WriteLine("Mouse at : ({0},{1})", Control.MousePosition.X, Control.MousePosition.Y);
+                        Console.WriteLine(layouts[monitor].GetIntersections()[i].ToString());
                         currentIntersection = layouts[monitor].GetIntersections()[i];
                         if (currentIntersection.IsInHitBox(Control.MousePosition.X, Control.MousePosition.Y))
                         {
@@ -353,14 +355,15 @@ namespace TEST2
                         } while (Control.MouseButtons == MouseButtons.Left);
                         Thread.Sleep(30);
                         inter.MoveHitBox(lx, ly);
+                        inter.UpdateWindows();
                     } 
                     else
                     {
                         do
                         {
-                            layouts[monitor].CheckIntegrity();
                             Thread.Sleep(30);
                         } while (Control.MouseButtons == MouseButtons.Left);
+                        layouts[monitor].CheckIntegrity();
                     }
                 } 
                 else if (Control.MouseButtons != MouseButtons.Left)

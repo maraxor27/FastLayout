@@ -31,14 +31,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="FastLayout.exe" size="75744">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="FastLayout.exe" size="77280">
       <assemblyIdentity name="FastLayout" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>DsHoDvvWCEC7ds9kpd9Mobr/st32ij39epWlYPSgHcQ=</dsig:DigestValue>
+        <dsig:DigestValue>PmHkGdsZehfiCUZ38XDbSfAismAp/ScUk5hiXfhslVU=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

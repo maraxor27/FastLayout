@@ -37,7 +37,10 @@ namespace TEST2
         }
         public void SetWindow(RECT r)
         {
-            window = r;
+            window.top = r.top;
+            window.left = r.left;
+            window.bottom = r.bottom;
+            window.right = r.right;
         }
         public RECT GetWindow()
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,9 @@ namespace TEST2
         static extern bool GetWindowRect(IntPtr hWnd, ref RECT Rect);
         //GetWindowRect(IntPtr hWnd, ref RECT Rect)
 
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int Width, int Height, bool Repaint);
+
         public Layout(RECT r)
         {
             currentWin = r;
@@ -34,6 +38,7 @@ namespace TEST2
         }
         public void AddIntersections(List<Intersection> inters)
         {
+            Console.WriteLine("Adding " + inters.Count + " intersections");
             foreach (Intersection inter in inters)
             {
                 AddIntersection(inter);
@@ -45,12 +50,20 @@ namespace TEST2
                 return false;
             inter.SetId(intersectionIdCount++);
             intersections.Add(inter);
-            foreach (LayoutWindow lw in inter.GetLayoutWindowList())
-                AddLayoutWindow(lw);
+            for (int i = 0; i < inter.GetLayoutWindowList().Count(); i++)
+            {
+                AddLayoutWindow(inter, i);
+            }
+            Console.WriteLine("-------- Intersections in the list --------");
+            foreach (Intersection i in intersections)
+            {
+                Console.WriteLine(i.ToString());
+            }
             return true;
         }
-        private void AddLayoutWindow(LayoutWindow lw)
+        private void AddLayoutWindow(Intersection inter, int index)
         {
+            LayoutWindow lw = inter.GetLayoutWindowList()[index];
             if (!ContainshWnd(lw.GetHWnd()))
             {
                 layoutWindows.Add(lw);
@@ -63,6 +76,7 @@ namespace TEST2
                     if (lw1.GetHWnd() == lw.GetHWnd())
                     {
                         lw1.IncrementUses();
+                        inter.GetLayoutWindowList()[index] = lw1;
                         return;
                     }
                 }
@@ -124,23 +138,48 @@ namespace TEST2
         {
             return intersections.Count;
         }
-        public List<LayoutWindow> GetlayoutWindows()
+        private List<LayoutWindow> GetlayoutWindows()
         {
             return layoutWindows;
         }
         public void CheckIntegrity()
         {
             RECT test = new RECT();
+            int similarity;
             foreach (LayoutWindow lw in layoutWindows)
             {
                 GetWindowRect(lw.GetHWnd(), ref test);
-                if (test != lw.GetWindow()) 
+                similarity = Similar(test, lw.GetWindow());
+                if (similarity > 0 && similarity < MAXDISTANCE)
                 {
-                    Console.WriteLine("Integrity check failed");
+                    
+                    Console.WriteLine("Window almost at the right spot: " + similarity + "pixels off\nAdjusting Data!");
+                    MoveWindow(lw.GetHWnd(), lw.GetWindow().left, lw.GetWindow().top,
+                        lw.GetWindow().right - lw.GetWindow().left, lw.GetWindow().bottom - lw.GetWindow().top, true);
+                }
+                else if (similarity > MAXDISTANCE)
+                {
+                    Console.WriteLine("Integrity check failed\n" + similarity + " pixels off");
+                    Console.WriteLine("\t\tMem values: " + Form1.RECTToString(lw.GetWindow()));
+                    Console.WriteLine("\t\tActual values: " + Form1.RECTToString(test));
                     Reset();
                     return; 
                 }
             }
+        }
+        private int Similar(RECT r1, RECT r2)
+        {
+            int farthest = Math.Abs(r1.top - r2.top);
+            int buffer = Math.Abs(r1.right - r2.right);
+            if (buffer > farthest)
+                farthest = buffer;
+            buffer = Math.Abs(r1.bottom - r2.bottom);
+            if (buffer > farthest)
+                farthest = buffer;
+            buffer = Math.Abs(r1.left - r2.left);
+            if (buffer > farthest)
+                farthest = buffer;
+            return farthest;
         }
     }
 }
