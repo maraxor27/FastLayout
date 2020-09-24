@@ -420,5 +420,14 @@ namespace TEST2
             else
                 return "horizontal";
         }
+        public bool ContainsHandle(IntPtr handle) 
+        {
+            foreach (LayoutWindow lw in layoutWindowList)
+            {
+                if (handle == lw.GetHWnd())
+                    return true;
+            }
+            return false;
+        }
     }
 }

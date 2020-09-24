@@ -331,6 +331,7 @@ namespace TEST2
                     Intersection currentIntersection;
                     int monitor = getMonitor(Control.MousePosition.X, Control.MousePosition.Y);
                     Intersection inter = null;
+                    IntPtr currentWindow = GetForegroundWindow();
                     for (int i = 0; i < layouts[monitor].GetIntersectionsSize(); i++)
                     {
                         Console.WriteLine("Mouse at : ({0},{1})", Control.MousePosition.X, Control.MousePosition.Y);
@@ -342,10 +343,11 @@ namespace TEST2
                             break;
                         }
                     }
-                    if (inter != null)
+                    if (inter != null && inter.ContainsHandle(currentWindow))
                     {
-                        Console.WriteLine("hitbox: " + RECTToString(inter.GetHitBox()) +
+                        /*Console.WriteLine("hitbox: " + RECTToString(inter.GetHitBox()) +
                                 " with mouse at: (" + Control.MousePosition.X + ", " + Control.MousePosition.Y + ")");
+                        */
                         int lx, ly;
                         do
                         {
